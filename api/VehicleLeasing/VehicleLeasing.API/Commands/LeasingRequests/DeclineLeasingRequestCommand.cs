@@ -5,7 +5,7 @@ using VehicleLeasing.API.Constants.Errors;
 using VehicleLeasing.API.Results;
 using VehicleLeasing.DataAccess.DbContexts;
 
-namespace VehicleLeasing.API.Commands;
+namespace VehicleLeasing.API.Commands.LeasingRequests;
 
 public record DeclineLeasingRequestCommand(int Id) : IRequest<Result>
 {
