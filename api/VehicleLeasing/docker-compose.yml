@@ -1,0 +1,32 @@
+﻿version: '3.9'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./VehicleLeasing.API/Dockerfile
+    ports:
+      - "5000:8080"
+    depends_on:
+      - db
+    environment:
+      DB_CONNECTION_STRING: Host=db;Port=5432;Username=postgres;Password=1234;Database=vehicle_leasing_db;
+      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_ENVIRONMENT: Development
+    restart: always
+
+  db:
+    image: postgres
+    container_name: vehicle_leasing_db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: vehicle_leasing_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  pgdata:

@@ -1,4 +1,5 @@
 using System.Reflection;
+using DotNetEnv;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
 using VehicleLeasing.API.Abstractions.Auth;
@@ -10,6 +11,8 @@ using VehicleLeasing.API.Extensions;
 using VehicleLeasing.API.Filters;
 using VehicleLeasing.API.Services;
 using VehicleLeasing.DataAccess.DbContexts;
+
+Env.Load(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -32,7 +35,7 @@ services.AddSwaggerGen();
 
 services.AddDbContext<VehicleLeasingDbContext>(options =>
 {
-    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
 });
 
 services.AddScoped<IPasswordHasher, EnhancedPasswordHasher>();
@@ -45,12 +48,11 @@ services.AddHttpClient<IExchangeRateService, ExchangeRateService>();
 
 var app = builder.Build();
 
+await using var scope = app.Services.CreateAsyncScope();
+await scope.ServiceProvider.GetRequiredService<VehicleLeasingDbContext>().Database.MigrateAsync();
+
 app.UseCors(x =>
-{
-    x.WithHeaders().AllowAnyHeader();
-    x.WithOrigins("http://localhost:3000");
-    x.WithMethods().AllowAnyMethod();
-});
+    x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().Build());
 
 app.UseSwagger();
 app.UseSwaggerUI();
