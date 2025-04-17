@@ -28,7 +28,7 @@ public class UsersController : ControllerBase
         => (await _mediator.Send(request, cancellationToken)).ToActionResult();
 
     [HttpPost("generate")]
-    [Authorize(Roles = $"{IdentityData.ManagerRoleName},{IdentityData.AdminRoleName}")]
+    [Authorize(Roles = $"{UserRoleNames.Manager},{UserRoleNames.Administrator}")]
     public async Task<IActionResult> GenerateAsync([FromBody] GenerateUsersCommand request, CancellationToken cancellationToken)
         => (await _mediator.Send(request, cancellationToken)).ToActionResult();
 }

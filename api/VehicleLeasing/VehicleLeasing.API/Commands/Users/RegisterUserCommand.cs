@@ -44,7 +44,7 @@ public record RegisterUserCommand(
         
             var user = new UserResponse(
                 Guid.NewGuid(),
-                IdentityData.UserRoleName, 
+                UserRoleNames.User, 
                 request.Name, 
                 request.Surname, 
                 request.Email, 

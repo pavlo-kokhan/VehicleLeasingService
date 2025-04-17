@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
 using VehicleLeasing.API.Abstractions.Auth;
 using VehicleLeasing.API.Abstractions.Services;
-using VehicleLeasing.API.BackgroundServices;
 using VehicleLeasing.API.Contracts.ExchangeRates;
 using VehicleLeasing.API.Contracts.Jwt;
 using VehicleLeasing.API.Extensions;
@@ -41,16 +40,10 @@ services.AddScoped<IVehicleMonthlyPaymentCalculator, VehicleMonthlyPaymentCalcul
 
 services.AddHttpClient<IExchangeRateService, ExchangeRateService>();
 
-// services.AddHostedService<ExchangeRatesUpdaterBackgroundService>();
-
 var app = builder.Build();
 
 app.UseCors(x =>
-{
-    x.WithHeaders().AllowAnyHeader();
-    x.WithOrigins("http://localhost:3000");
-    x.WithMethods().AllowAnyMethod();
-});
+    x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().Build());
 
 app.UseSwagger();
 app.UseSwaggerUI();

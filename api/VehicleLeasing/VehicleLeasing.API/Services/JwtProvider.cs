@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using VehicleLeasing.API.Abstractions.Auth;
+using VehicleLeasing.API.Constants;
 using VehicleLeasing.API.Contracts.Jwt;
 using VehicleLeasing.API.Contracts.Users;
 
@@ -16,8 +17,8 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
     public string GenerateToken(UserResponse userResponse)
     {
         List<Claim> claims = [
-            new Claim(ClaimTypes.NameIdentifier, userResponse.Id.ToString()),
-            new Claim(ClaimTypes.Role, userResponse.Role)];
+            new Claim(ClaimTypes.Role, userResponse.Role),
+            new Claim(CustomJwtRegisteredClaimNames.UserId, userResponse.Id.ToString())];
 
         var securityKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_options.SecretKey));

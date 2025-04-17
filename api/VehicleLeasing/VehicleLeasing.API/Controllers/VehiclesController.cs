@@ -22,7 +22,7 @@ public class VehiclesController : ControllerBase
     }
     
     [HttpGet("page")]
-    [Authorize(Roles = IdentityData.AdminRoleName)]
+    [Authorize(Roles = UserRoleNames.Administrator)]
     public async Task<IActionResult> GetPageAsync(
         [FromQuery] VehiclesFilter? filter,
         [FromQuery] SortParameters? sortParameters,
@@ -32,22 +32,22 @@ public class VehiclesController : ControllerBase
             .ToActionResult();
     
     [HttpGet]
-    [Authorize(Roles = IdentityData.AdminRoleName)]
+    [Authorize(Roles = UserRoleNames.Administrator)]
     public async Task<IActionResult> GetByIdAsync(int id, CancellationToken cancellationToken)
         => (await _mediator.Send(new VehicleQuery(id), cancellationToken)).ToActionResult();
     
     [HttpPost]
-    [Authorize(Roles = IdentityData.AdminRoleName)]
+    [Authorize(Roles = UserRoleNames.Administrator)]
     public async Task<IActionResult> CreateAsync([FromBody] CreateVehicleCommand request, CancellationToken cancellationToken)
         => (await _mediator.Send(request, cancellationToken)).ToActionResult();
     
     [HttpPut]
-    [Authorize(Roles = IdentityData.AdminRoleName)]
+    [Authorize(Roles = UserRoleNames.Administrator)]
     public async Task<IActionResult> UpdateAsync([FromBody] UpdateVehicleCommand request, CancellationToken cancellationToken)
         => (await _mediator.Send(request, cancellationToken)).ToActionResult();
     
     [HttpDelete]
-    [Authorize(Roles = IdentityData.AdminRoleName)]
+    [Authorize(Roles = UserRoleNames.Administrator)]
     public async Task<IActionResult> DeleteAsync([FromBody] DeleteVehicleCommand request, CancellationToken cancellationToken)
         => (await _mediator.Send(request, cancellationToken)).ToActionResult();
     
