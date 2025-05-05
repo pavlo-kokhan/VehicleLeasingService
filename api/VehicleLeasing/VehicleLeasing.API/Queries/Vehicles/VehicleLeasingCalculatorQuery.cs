@@ -14,6 +14,7 @@ public record VehicleLeasingCalculatorQuery(
     string Category,
     string Brand,
     string Model,
+    int Year,
     int LeasingMonths,
     int AdvancePercentage) : IRequest<Result<VehicleForLeasingResponse>>
 {
@@ -38,9 +39,10 @@ public record VehicleLeasingCalculatorQuery(
                 .Include(v => v.Transmission)
                 .Include(v => v.FuelType)
                 .Where(v => v.Status.Status == VehicleStatuses.Available
+                            && v.Category.Category.ToLower().Replace(" ", string.Empty) == request.Category.ToLower().Replace(" ", string.Empty)
                             && v.Brand == request.Brand
                             && v.Model == request.Model
-                            && v.Category.Category.ToLower().Replace(" ", string.Empty) == request.Category.ToLower().Replace(" ", string.Empty)
+                            && v.Year == request.Year
                             && v.Status.Status == VehicleStatuses.Available)
                 .FirstOrDefaultAsync(cancellationToken);
                 
@@ -64,7 +66,7 @@ public record VehicleLeasingCalculatorQuery(
                 request.LeasingMonths, 
                 interestRate);
 
-            var exchangeRates = await _exchangeRateService.GetRatesAsync(
+            var exchangeRates = await _exchangeRateService.GetRatesToUsdAsync(
                 DateOnly.FromDateTime(DateTime.Today));
             
             var rateEur = exchangeRates.FirstOrDefault(r => r.CurrencyCode == CurrencyCodes.Eur)

@@ -1,6 +1,7 @@
 using System.Reflection;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using VehicleLeasing.API.Abstractions.Auth;
 using VehicleLeasing.API.Abstractions.Services;
 using VehicleLeasing.API.Contracts.ExchangeRates;
@@ -27,7 +28,33 @@ services.AddMediatR(c =>
 services.AddPipelines();
 services.AddFluentValidation();
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
+services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Введіть JWT токен у форматі: Bearer {токен}"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            []
+        }
+    });
+});
 
 services.AddDbContext<VehicleLeasingDbContext>(options =>
 {

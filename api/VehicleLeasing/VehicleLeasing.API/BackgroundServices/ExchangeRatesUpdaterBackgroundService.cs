@@ -32,7 +32,7 @@ public class ExchangeRatesUpdaterBackgroundService : BackgroundService
             var exchangeRateService = scope.ServiceProvider.GetRequiredService<ExchangeRateService>();
             
             var today = DateOnly.FromDateTime(DateTime.Today);
-            var todayRates = await exchangeRateService.GetRatesAsync(today);
+            var todayRates = await exchangeRateService.GetRatesToUsdAsync(today);
 
             if (!todayRates.Any()) return;
 

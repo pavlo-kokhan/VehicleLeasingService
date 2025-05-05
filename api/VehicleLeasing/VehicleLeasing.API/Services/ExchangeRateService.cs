@@ -16,15 +16,10 @@ public class ExchangeRateService : IExchangeRateService
         _options = options;
     }
     
-    public async Task<List<ExchangeRateDto>> GetRatesAsync(DateOnly targetDate)
+    public async Task<List<ExchangeRateDto>> GetRatesToUsdAsync(DateOnly targetDate)
     {
-        var date = targetDate.ToString("yyyyMMdd");
-    
-        var usdResponse = await _httpClient.GetFromJsonAsync<ExchangeRateDto[]>(
-            $"{_options.Value.NbuBaseUrl}?start={date}&end={date}&valcode={CurrencyCodes.Usd}&sort=exchangedate&order=desc&json");
-    
-        var eurResponse = await _httpClient.GetFromJsonAsync<ExchangeRateDto[]>(
-            $"{_options.Value.NbuBaseUrl}?start={date}&end={date}&valcode={CurrencyCodes.Eur}&sort=exchangedate&order=desc&json");
+        var usdResponse = await GetResponseDtosAsync(targetDate, CurrencyCodes.Usd);
+        var eurResponse = await GetResponseDtosAsync(targetDate, CurrencyCodes.Eur);
 
         if (usdResponse is null || eurResponse is null || !usdResponse.Any() || !eurResponse.Any())
             return new();
@@ -47,5 +42,32 @@ public class ExchangeRateService : IExchangeRateService
                 Rate = usdToEur
             }
         };
+    }
+    
+    public async Task<List<ExchangeRateDto>> GetRatesTableToUahAsync(DateOnly targetDate)
+    {
+        var result = new List<ExchangeRateDto>();
+        
+        var currencyCodes = new[] { CurrencyCodes.Usd, CurrencyCodes.Eur, CurrencyCodes.Pln, CurrencyCodes.Gbp };
+
+        foreach (var code in currencyCodes)
+        {
+            var rates = await GetResponseDtosAsync(targetDate, code);
+            
+            if (rates is not null && rates.Any())
+            {
+                result.Add(rates.First());
+            }
+        }
+
+        return result;
+    }
+
+    private async Task<ExchangeRateDto[]?> GetResponseDtosAsync(DateOnly targetDate, string currencyCode)
+    {
+        var date = targetDate.ToString("yyyyMMdd");
+        
+        return await _httpClient.GetFromJsonAsync<ExchangeRateDto[]>(
+            $"{_options.Value.NbuBaseUrl}?start={date}&end={date}&valcode={currencyCode}&sort=exchangedate&order=desc&json");
     }
 }

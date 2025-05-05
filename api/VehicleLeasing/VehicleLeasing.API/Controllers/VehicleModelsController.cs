@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using VehicleLeasing.API.Extensions;
-using VehicleLeasing.API.Queries;
 using VehicleLeasing.API.Queries.Vehicles;
 
 namespace VehicleLeasing.API.Controllers;

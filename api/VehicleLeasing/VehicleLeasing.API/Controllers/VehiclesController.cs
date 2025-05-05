@@ -5,6 +5,7 @@ using VehicleLeasing.API.Commands.Vehicles;
 using VehicleLeasing.API.Constants;
 using VehicleLeasing.API.Contracts.QueryParameters.Common;
 using VehicleLeasing.API.Contracts.QueryParameters.Vehicles;
+using VehicleLeasing.API.Contracts.Vehicles;
 using VehicleLeasing.API.Extensions;
 using VehicleLeasing.API.Queries.Vehicles;
 
@@ -43,19 +44,29 @@ public class VehiclesController : ControllerBase
     
     [HttpPut]
     [Authorize(Roles = UserRoleNames.Administrator)]
-    public async Task<IActionResult> UpdateAsync([FromBody] UpdateVehicleCommand request, CancellationToken cancellationToken)
-        => (await _mediator.Send(request, cancellationToken)).ToActionResult();
+    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateVehicleRequest request, CancellationToken cancellationToken)
+        => (await _mediator.Send(new UpdateVehicleCommand(
+            id, 
+            request.Brand, 
+            request.Model, 
+            request.Year, 
+            request.EstimatedPrice, 
+            request.Category, 
+            request.Transmission, 
+            request.FuelType, 
+            request.Status), cancellationToken)).ToActionResult();
     
     [HttpDelete]
     [Authorize(Roles = UserRoleNames.Administrator)]
-    public async Task<IActionResult> DeleteAsync([FromBody] DeleteVehicleCommand request, CancellationToken cancellationToken)
-        => (await _mediator.Send(request, cancellationToken)).ToActionResult();
+    public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
+        => (await _mediator.Send(new DeleteVehicleCommand(id), cancellationToken)).ToActionResult();
     
     [HttpGet("leasing-calculator")]
     public async Task<IActionResult> GetByParametersAsync(
         string category,
         string brand, 
         string model,
+        int year,
         int leasingMonths,
         int advancePercentage,
         CancellationToken cancellationToken)
@@ -63,6 +74,7 @@ public class VehiclesController : ControllerBase
                     category, 
                     brand, 
                     model, 
+                    year,
                     leasingMonths, 
                     advancePercentage), 
                 cancellationToken))

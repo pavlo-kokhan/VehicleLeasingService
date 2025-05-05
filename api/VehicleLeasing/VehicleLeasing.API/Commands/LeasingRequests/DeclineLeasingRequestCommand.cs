@@ -26,14 +26,29 @@ public record DeclineLeasingRequestCommand(int Id) : IRequest<Result>
             if (newLeasingRequestStatus is null)
                 return LeasingRequestsValidationErrors.LeasingRequestStatusNotFound;
             
-            var updateResult = await _context.LeasingRequests
+            var leasingRequest = await _context.LeasingRequests
                 .Where(r => r.Id == request.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (leasingRequest is null)
+                return LeasingRequestsValidationErrors.LeasingRequestNotFound;
+            
+            leasingRequest.StatusId = newLeasingRequestStatus.Id;
+            
+            var newVehicleStatus = await _context.VehicleStatuses
+                .FirstOrDefaultAsync(s => s.Status == VehicleStatuses.Available, cancellationToken);
+
+            if (newVehicleStatus is null)
+                return VehiclesValidationErrors.VehicleStatusNotFound;
+            
+            var vehicleUpdateResult = await _context.Vehicles
+                .Where(v => v.Id == leasingRequest.VehicleId)
                 .ExecuteUpdateAsync(u => u
-                        .SetProperty(r => r.StatusId, newLeasingRequestStatus.Id), 
+                        .SetProperty(v => v.StatusId, newVehicleStatus.Id), 
                     cancellationToken);
 
-            if (updateResult < 1)
-                return LeasingRequestsValidationErrors.LeasingRequestNotFound;
+            if (vehicleUpdateResult < 1)
+                return VehiclesValidationErrors.VehicleNotFound;
             
             await _context.SaveChangesAsync(cancellationToken);
             

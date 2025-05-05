@@ -20,31 +20,25 @@ public record DeleteLeasingRequestCommand(int Id) : IRequest<Result>
         
         public async Task<Result> Handle(DeleteLeasingRequestCommand request, CancellationToken cancellationToken)
         {
+            var leasingRequest = await _context.LeasingRequests
+                .Include(r => r.Vehicle)
+                .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
+
+            if (leasingRequest is null)
+                return LeasingRequestsValidationErrors.LeasingRequestNotFound;
+            
             var newVehicleStatus = await _context.VehicleStatuses
                 .FirstOrDefaultAsync(s => s.Status == VehicleStatuses.Available, cancellationToken);
 
             if (newVehicleStatus is null)
                 return VehiclesValidationErrors.VehicleStatusNotFound;
             
-            var vehicleUpdateResult = await _context.LeasingRequests
-                .Include(r => r.Vehicle)
-                .Where(r => r.Id == request.Id)
-                .ExecuteUpdateAsync(u => u
-                        .SetProperty(r => r.Vehicle.StatusId, newVehicleStatus.Id), 
-                    cancellationToken);
+            leasingRequest.Vehicle.StatusId = newVehicleStatus.Id;
 
-            if (vehicleUpdateResult < 1)
-                return VehiclesValidationErrors.VehicleNotFound;
-            
-            var deletingResult = await _context.LeasingRequests
-                .Where(r => r.Id == request.Id)
-                .ExecuteDeleteAsync(cancellationToken);
-            
-            if (deletingResult < 1)
-                return LeasingRequestsValidationErrors.LeasingRequestNotFound;
-            
+            _context.LeasingRequests.Remove(leasingRequest);
+
             await _context.SaveChangesAsync(cancellationToken);
-            
+
             return Result.Success();
         }
     }

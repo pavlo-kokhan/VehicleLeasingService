@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VehicleLeasing.API.Commands;
 using VehicleLeasing.API.Commands.LeasingRequests;
 using VehicleLeasing.API.Constants;
 using VehicleLeasing.API.Contracts.LeasingRequests;
@@ -39,7 +38,7 @@ public class LeasingRequestsController : ControllerBase
         => (await _mediator.Send(new LeasingRequestQuery(id), cancellationToken)).ToActionResult();
     
     [HttpPost]
-    [Authorize(Roles = UserRoleNames.User)]
+    [Authorize(Roles = $"{UserRoleNames.User},{UserRoleNames.Manager},{UserRoleNames.Administrator}")]
     public async Task<IActionResult> CreateAsync([FromBody] CreateLeasingRequest request, CancellationToken cancellationToken)
         => (await _mediator.Send(new CreateLeasingRequestCommand(
             request.VehicleId,
@@ -49,16 +48,16 @@ public class LeasingRequestsController : ControllerBase
 
     [HttpPut("approve")]
     [Authorize(Roles = $"{UserRoleNames.Manager},{UserRoleNames.Administrator}")]
-    public async Task<IActionResult> ApproveAsync([FromBody] ApproveLeasingRequestCommand request, CancellationToken cancellationToken) 
-        => (await _mediator.Send(request, cancellationToken)).ToActionResult();
+    public async Task<IActionResult> ApproveAsync(int id, CancellationToken cancellationToken) 
+        => (await _mediator.Send(new ApproveLeasingRequestCommand(id), cancellationToken)).ToActionResult();
     
     [HttpPut("decline")]
     [Authorize(Roles = $"{UserRoleNames.Manager},{UserRoleNames.Administrator}")]
-    public async Task<IActionResult> DeclineAsync([FromBody] DeclineLeasingRequestCommand request, CancellationToken cancellationToken) 
-        => (await _mediator.Send(request, cancellationToken)).ToActionResult();
+    public async Task<IActionResult> DeclineAsync(int id, CancellationToken cancellationToken) 
+        => (await _mediator.Send(new DeclineLeasingRequestCommand(id), cancellationToken)).ToActionResult();
     
     [HttpDelete]
     [Authorize(Roles = $"{UserRoleNames.Manager},{UserRoleNames.Administrator}")]
-    public async Task<IActionResult> DeleteAsync([FromBody] DeleteLeasingRequestCommand request, CancellationToken cancellationToken) 
-        => (await _mediator.Send(request, cancellationToken)).ToActionResult();
+    public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken) 
+        => (await _mediator.Send(new DeleteLeasingRequestCommand(id), cancellationToken)).ToActionResult();
 }
